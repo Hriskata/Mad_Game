@@ -1,8 +1,23 @@
 from tkinter import *
 import random
+from PIL import ImageTk, Image
+import requests
+from io import BytesIO
+
 
 # global list with possible words
 words = ["apple", "banana", "orange", "elephant", "function"]
+
+mistake_0 = "https://github.com/Hriskata/Mad_Game/blob/main/images/0.png?raw=true"
+mistake_1 = "https://github.com/Hriskata/Mad_Game/blob/main/images/1.png?raw=true"
+mistake_2 = "https://github.com/Hriskata/Mad_Game/blob/main/images/2.png?raw=true"
+mistake_3 = "https://github.com/Hriskata/Mad_Game/blob/main/images/3.png?raw=true"
+mistake_4 = "https://github.com/Hriskata/Mad_Game/blob/main/images/4.png?raw=true"
+mistake_5 = "https://github.com/Hriskata/Mad_Game/blob/main/images/5.png?raw=true"
+mistake_6 = "https://github.com/Hriskata/Mad_Game/blob/main/images/6.png?raw=true"
+mistake_7 = "https://github.com/Hriskata/Mad_Game/blob/main/images/7.png?raw=true"
+
+images_mistakes_list = [mistake_0, mistake_1, mistake_2, mistake_3, mistake_4, mistake_5, mistake_6, mistake_7]
 
 # function that generate the random word
 def generate_word():
@@ -21,6 +36,22 @@ def creating_buttons():
         letter_button.pack(side="left")
 
 
+# function to display the image from my github
+def display_image(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        try:
+            image_data = response.content
+            image = Image.open(BytesIO(image_data))
+            photo = ImageTk.PhotoImage(image)
+            image_label.config(image=photo)
+            image_label.image = photo
+        except:
+            print("Failed to open or load the image.")
+    else:
+        print("Failed to download the image.")
+
+
 # function that reveals letters of the word
 def reveal_letter(letter):
     if letter in chosen_word:
@@ -36,6 +67,7 @@ def reveal_letter(letter):
 
     else:
         current_mistakes.set(current_mistakes.get()+1)
+        display_image(images_mistakes_list[current_mistakes.get()])
         if current_mistakes.get() >= 7:
             for i in letter_buttons:
                 letter_buttons[i].config(state="disable")
@@ -82,10 +114,11 @@ def play_again():
         reveal_first_last_l(chosen_word)
         current_mistakes.set(0)
         result.set("")
+        display_image(images_mistakes_list[current_mistakes.get()])
     except Exception as e:
         print(e)
         future_label = Label(window, text="FUTURE IDEA")
-        future_label.grid(row=6, column=0, columnspan=2)
+        future_label.grid(row=8, column=0, columnspan=2)
         play_again_button.config(state="disable")
 
 
@@ -99,7 +132,7 @@ chosen_word = generate_word()
 # creating window
 window = Tk()
 window.title("Mad game")
-window.geometry("440x300")
+window.geometry("440x400")
 
 # label for the chosen word
 current_guess = ["_ " for _ in chosen_word]
@@ -120,7 +153,7 @@ reveal_first_last_l(chosen_word)
 
 # mistakes frame
 mistakes_frame = Frame(window)
-mistakes_frame.grid(row=2, column=0, rowspan=2, columnspan=2)
+mistakes_frame.grid(row=2, column=0, rowspan=3, columnspan=2)
 
 # mistakes label
 mistakes_text_label = Label(mistakes_frame, text="You can make only 6 mistakes!")
@@ -136,18 +169,23 @@ current_mistakes.set(0)
 mistakes_label = Label(mistakes_frame, textvariable=current_mistakes)
 mistakes_label.grid(row=3, column=1, columnspan=2)
 
+# label for images
+image_label = Label(mistakes_frame)
+display_image(images_mistakes_list[0])
+image_label.grid(row=4,column=0, rowspan=2, columnspan=2)
+
 # result text label
 result = StringVar()
 result_label = Label(window, textvariable=result)
 result.set("")
-result_label.grid(row=4, column=0, columnspan=2)
+result_label.grid(row=6, column=0, columnspan=2)
 
 # play again button
 play_again_button = Button(window, text="PLAY AGAIN", command=play_again, state="disable")
-play_again_button.grid(row=5,column=0)
+play_again_button.grid(row=7,column=0)
 
 # exit button
 exit_button = Button(window, text="EXIT", command=close_app)
-exit_button.grid(row=5,column=1)
+exit_button.grid(row=7,column=1)
 
 window.mainloop()
